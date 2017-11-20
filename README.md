@@ -1,6 +1,6 @@
 # Duo Labs IDAPython Repository
 
-This IDAPython repository contains a few Python modules developed for use with IDA Pro from the researchers at Duo Labs. There are currently two modules being released. These modules are discussed in the blog post at <duo.sc/personal-protection>, and in the associated paper [Examining Personal Protection Devices
+This IDAPython repository contains a few Python modules developed for use with IDA Pro from the researchers at Duo Labs. There are currently two modules being released. These modules are discussed in the blog post at [duo.sc/personal-protection], and in the associated paper [Examining Personal Protection Devices
 Hardware & Firmware Research Methodology in Action](https://duo.com/assets/ebooks/Duo-Labs-Personal-Protection-Devices.pdf).
 
 We also wish to thank two contributors that discussed ARM code detection heuristics during the development of this code: Luis Miras and Josh Mitchell. 
