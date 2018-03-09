@@ -34,3 +34,15 @@ class Amnesia:
  def make_new_functions_heuristic_push_regs(self, makefunction=False)
  def nonfunction_first_instruction_heuristic(self, makefunction=False)
 ```
+
+### REobjc (reobjc.py)
+REobjc is an IDAPython module designed to make proper cross references between calling functions and called functions in Objective-C methods. The current form of the module supports X64, and will be updated to also support ARM in the future.
+
+```python
+idaapi.require("reobjc")
+r = reobjc.REobjc(autorun=True)
+```
+
+The module is described in detail in the Duo blog post [Reversing Objective-C Binaries With the REobjc Module for IDA Pro](https://duo.com/blog/reversing-objective-c-binaries-with-the-reobjc-module-for-ida-pro).
+
+
