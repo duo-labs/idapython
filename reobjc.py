@@ -15,6 +15,7 @@ class REobjc:
     '''
     Todd Manning
     tmanning@duo.com
+    https://duo.com/blog/reversing-objective-c-binaries-with-the-reobjc-module-for-ida-pro
     
     Code to assist in reverse engineering MacOS Objective C binaries.
     Currently this code is Intel x64 specific, and doesn't handle ARM/iOS.
