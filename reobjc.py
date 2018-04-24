@@ -15,8 +15,6 @@ class REobjc:
     '''
     Todd Manning
     tmanning@duo.com
-    https://duo.com/blog/reversing-objective-c-binaries-with-the-reobjc-module-for-ida-pro
-    
     
     Code to assist in reverse engineering MacOS Objective C binaries.
     Currently this code is Intel x64 specific, and doesn't handle ARM/iOS.
@@ -232,14 +230,15 @@ class REobjc:
                         call_type = "indirect"                        
                         target_register = call_operand
                         call_target_dict = self.resolve_register_backwalk_ea(call_ea, target_register)
-                        call_target = call_target_dict["value"]
+                        if call_target_dict:
+                            call_target = call_target_dict["value"]
                     else:
                         call_type = "direct"
                         call_target = call_operand
                     
                     # check the list of functions from the objc runtime
                     # call_target should be validated here, in case something fails with resolve_register_backwalk_ea()
-                    if self.lookup_objc_runtime_function(call_target):
+                    if call_target and self.lookup_objc_runtime_function(call_target):
                         if self.debugflag: print "%s call, operand_type == %s" % (call_type, idc.get_operand_type(call_ea,0))
                         
                         # get the argument values at the call
