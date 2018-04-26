@@ -390,10 +390,12 @@ class REobjc:
         tif = ida_typeinf.tinfo_t()
         idaapi.get_tinfo2(f_start, tif)
         funcdata = idaapi.func_type_data_t()
-        tif.get_func_details(funcdata)
+        got_data = tif.get_func_details(funcdata)
 
         # not happy about casting to a string and then regex replacing... but that's the best I could come up with
-        replace_reg = re.compile(' \*', re.IGNORECASE)
-        objc_self_type = funcdata[0].type
-        return objc_self_type
-        
+        if got_data:
+            replace_reg = re.compile(' \*', re.IGNORECASE)
+            objc_self_type = funcdata[0].type
+            return objc_self_type
+        else:
+            return None
