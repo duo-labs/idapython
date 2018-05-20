@@ -26,7 +26,7 @@ class Amnesia:
     
     def find_function_epilogue_bxlr(self, makecode=False):
         '''
-        Find opcode bytes corresponding to BX LR.
+        Find opcode bytes corresponding to BX LR in thumb mode.
         This is a common way to return from a function call.
         Using the IDA API, convert these opcodes to code. This kicks off IDA analysis.
         '''
@@ -49,6 +49,7 @@ class Amnesia:
                 if self.printflag:
                     print fmt_string % (ea, instructions[0], instructions[1])
                 if makecode:
+                    idc.SetRegEx(ea, "T", 1, idc.SR_user)
                     idc.MakeCode(ea)
             ea = ea + length
 
@@ -84,6 +85,7 @@ class Amnesia:
                 if self.printflag:
                     print fmt_string % (ea, instructions[0], instructions[1])
                 if makecode:
+                    idc.SetRegEx(ea, "T", 1, idc.SR_user)
                     idc.MakeCode(ea)
             ea = ea + length
 
@@ -117,6 +119,7 @@ class Amnesia:
                 if self.printflag:
                     print fmt_string % ("POP ", ea, instructions[0], instructions[1])
                 if makecode:
+                    idc.SetRegEx(ea, "T", 0, idc.SR_user)
                     idc.MakeCode(ea)
             
             if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and      \
@@ -125,6 +128,7 @@ class Amnesia:
                 if self.printflag:
                     print fmt_string % ("PUSH", ea, instructions[0], instructions[1])
                 if makecode: 
+                    idc.SetRegEx(ea, "T", 0, idc.SR_user)
                     idc.MakeCode(ea)
             ea = ea + length
 
