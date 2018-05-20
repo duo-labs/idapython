@@ -111,6 +111,7 @@ class CortexMFirmware:
 
             if dword != 0:
                 # print "ea %08x = 0x%08x" % (ea, dword)
+                idc.SetRegEx(dword-1, "T", 1, idc.SR_user)
                 idc.MakeCode(dword-1)
                 idc.MakeFunction(dword-1)
                 # TODO fix the offsets created here
