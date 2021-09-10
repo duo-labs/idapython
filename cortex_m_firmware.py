@@ -70,8 +70,8 @@ class CortexMFirmware:
         ]
 
         if not self.verify_processor_settings():
-            print "ERROR: Processor architecture is incorrect"
-            print "Please set processor type to ARM, and ARM architecture options to ARMv7-M (or other valid Cortex architecture)"
+            print("ERROR: Processor architecture is incorrect")
+            print("Please set processor type to ARM, and ARM architecture options to ARMv7-M (or other valid Cortex architecture)")
             return None
             
         

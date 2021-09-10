@@ -61,12 +61,12 @@ class REobjc:
         positive_reg = re.compile('.*_objc_msgsend', re.IGNORECASE)
         negative_reg = re.compile('^$', re.IGNORECASE)
         
-        if self.printflag: print "Finding Objective C runtime functions..."
+        if self.printflag: print("Finding Objective C runtime functions...")
 
         for name_tuple in idautils.Names(): # returns a tuple (address, name)
             addr, name = name_tuple
             if positive_reg.match(name) and not negative_reg.match(name):
-                if self.printflag: print "0x%08x\t%s" % (addr, name)
+                if self.printflag: print("0x%08x\t%s" % (addr, name))
                 self.target_objc_msgsend.append(name_tuple)
         
         return None
@@ -85,13 +85,13 @@ class REobjc:
         
         # fname is found
         if function_ea != idc.BADADDR:
-            if self.debugflag: print "Looking for function %s" % fname
+            if self.debugflag: print("Looking for function %s" % fname)
             
             # iterate over objc runtime functions
             for name_tuple in self.target_objc_msgsend:
                 addr, name = name_tuple
                 if fname == name:
-                    if self.debugflag:  print "Found match: 0x%08x\t%s" % (addr, name)
+                    if self.debugflag:  print("Found match: 0x%08x\t%s" % (addr, name))
                     return name_tuple
                 
         return None
@@ -114,7 +114,7 @@ class REobjc:
         # get instruction mnemonic at address - I guess to check and make sure 
         # it's mov rsi, blah
         instruction = idc.GetDisasm(objc_selector)
-        if self.debugflag: print ">>> objc_msgsend_xref 0x%08x %s" % (objc_selector, instruction)
+        if self.debugflag: print(">>> objc_msgsend_xref 0x%08x %s" % (objc_selector, instruction))
         
         # get outbound references in the appropriate segment
         # implicit assumption is there is exacltly one
@@ -163,7 +163,7 @@ class REobjc:
                         # assumption made on function always being in text segment
                         if idc.SegName(_meth_ref) == "__text":
                             # save the method implementation -- this is the function ptr
-                            if self.debugflag: print "0x%08x checking for the proper method -- %s" % (_meth_ref, idc.get_name(idc.get_func_attr(_meth_ref, idc.FUNCATTR_START)))
+                            if self.debugflag: print("0x%08x checking for the proper method -- %s" % (_meth_ref, idc.get_name(idc.get_func_attr(_meth_ref, idc.FUNCATTR_START))))
                             target_method = _meth_ref
 
         if not target_method:
@@ -172,7 +172,7 @@ class REobjc:
         # After dereferencing across the IDB file, we finally have a target function. 
         # In other words, if there isn't a method **in this binary** no xref is made (IDA only loads one binary?)
         # that is referenced from the mov rsi, <selector> instruction
-        if self.debugflag: print "Found target method 0x%08x" % target_method
+        if self.debugflag: print("Found target method 0x%08x" % target_method)
         if create_xref: idc.AddCodeXref(objc_selector, target_method, idc.fl_CF)
         
         return True
@@ -191,9 +191,9 @@ class REobjc:
                 self.find_objc_calls(f)
             except Exception as e:
                 fname = idc.get_name(idc.get_func_attr(f, idc.FUNCATTR_START))
-                print "\n\n[!!] Exception processing function %s: %s @ ea = 0x%08x (%dL)" % (fname, e, self.ea, self.ea)
+                print("\n\n[!!] Exception processing function %s: %s @ ea = 0x%08x (%dL)" % (fname, e, self.ea, self.ea))
                 traceback.print_exc()
-                print "\n\n"
+                print("\n\n")
                 
             
 
@@ -206,7 +206,7 @@ class REobjc:
             f_end   = idc.get_func_attr(f, idc.FUNCATTR_END)
         
             for ea in idautils.Heads(f_start, f_end):
-                if self.debugflag: print "0x%08x '%s'" % (ea, idc.GetMnem(ea))
+                if self.debugflag: print("0x%08x '%s'" % (ea, idc.GetMnem(ea)))
 
                 objc_selector = None
                 objc_selector_ea = None
@@ -240,7 +240,7 @@ class REobjc:
                     # check the list of functions from the objc runtime
                     # call_target should be validated here, in case something fails with resolve_register_backwalk_ea()
                     if call_target and self.lookup_objc_runtime_function(call_target):
-                        if self.debugflag: print "%s call, operand_type == %s" % (call_type, idc.get_operand_type(call_ea,0))
+                        if self.debugflag: print("%s call, operand_type == %s" % (call_type, idc.get_operand_type(call_ea,0)))
                         
                         # get the argument values at the call
                         # id objc_msgSend(id self, SEL op, ...);
@@ -277,12 +277,12 @@ class REobjc:
                         # TODO eliminate hardcoded x64
                         if objc_self and objc_self['value'] == 'rdi':
                             objc_class = self.resolve_objc_self_to_class(objc_self['target_ea'])
-                            if self.debugflag: print "### objc_class == %s" % objc_class
+                            if self.debugflag: print("### objc_class == %s" % objc_class)
                         
                         # objc_selector: address of instruction mov rsi, <selector>
                         if objc_self and objc_selector:
                             xref_created = self.objc_msgsend_xref(call_ea, objc_self['target_ea'], objc_selector['target_ea'])
-                            if self.printxrefs and xref_created: print "0x%08x Creating xref: %s %s, %s" % (ea, idc.GetMnem(ea), idc.GetOpnd(ea, 0), objc_selector['value'])
+                            if self.printxrefs and xref_created: print("0x%08x Creating xref: %s %s, %s" % (ea, idc.GetMnem(ea), idc.GetOpnd(ea, 0), objc_selector['value']))
 
 
 
@@ -339,7 +339,7 @@ class REobjc:
         while curr_ea != idc.BADADDR:
             instruction = idc.GetDisasm(curr_ea)
                         
-            if self.debugflag: print "0x%08x %s" % (curr_ea, instruction)
+            if self.debugflag: print("0x%08x %s" % (curr_ea, instruction))
             
             # looking for the previous place this register was assigned a value
             mnem = idc.GetMnem(curr_ea)
@@ -353,7 +353,7 @@ class REobjc:
                 target_value = src
                 target_ea = curr_ea
                 target_type = idc.get_operand_type(curr_ea,1)
-                if self.debugflag: print "            new target set %s (type=%d)" % (target, idc.get_operand_type(curr_ea,1))
+                if self.debugflag: print("            new target set %s (type=%d)" % (target, idc.get_operand_type(curr_ea,1)))
                         
             # take stab at tracking calls - this is not the greatest approach, but slightly more correct than doing no tracking
             # call instruction affects RAX if it returns a result
@@ -368,7 +368,7 @@ class REobjc:
             curr_ea = idc.prev_head(curr_ea-1, f_start)
 
         if target_value: 
-            if self.verboseflag: print ">>> 0x%08x, %s is set to %s @ 0x%08x" % (ea, target_dest_reg, target_value, target_ea)
+            if self.verboseflag: print(">>> 0x%08x, %s is set to %s @ 0x%08x" % (ea, target_dest_reg, target_value, target_ea))
             ret_dict = {"target" : target_dest_reg, "value" : target_value, "target_ea" : target_ea, "ea" : ea, "type" : target_type}
 
             if previous_call:

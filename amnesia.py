@@ -47,7 +47,7 @@ class Amnesia:
 
             if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and instructions[0] == 0x70 and instructions[1] == 0x47:
                 if self.printflag:
-                    print fmt_string % (ea, instructions[0], instructions[1])
+                    print(fmt_string % (ea, instructions[0], instructions[1]))
                 if makecode:
                     idc.MakeCode(ea)
             ea = ea + length
@@ -82,7 +82,7 @@ class Amnesia:
 
             if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and instructions[0] in thumb_reg_list and (instructions[1] == 0xb5 or instructions[1]== 0xbd):
                 if self.printflag:
-                    print fmt_string % (ea, instructions[0], instructions[1])
+                    print(fmt_string % (ea, instructions[0], instructions[1]))
                 if makecode:
                     idc.MakeCode(ea)
             ea = ea + length
@@ -115,7 +115,7 @@ class Amnesia:
             if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and      \
             (instructions[0] == 0xbd and instructions[1] == 0xe8): 
                 if self.printflag:
-                    print fmt_string % ("POP ", ea, instructions[0], instructions[1])
+                    print(fmt_string % ("POP ", ea, instructions[0], instructions[1]))
                 if makecode:
                     idc.MakeCode(ea)
             
@@ -123,7 +123,7 @@ class Amnesia:
             (instructions[0] == 0x2d and instructions[1] == 0xe9)    \
             :
                 if self.printflag:
-                    print fmt_string % ("PUSH", ea, instructions[0], instructions[1])
+                    print(fmt_string % ("PUSH", ea, instructions[0], instructions[1]))
                 if makecode: 
                     idc.MakeCode(ea)
             ea = ea + length
@@ -139,7 +139,7 @@ class Amnesia:
         
         while ea < EAend:
             if self.printflag:
-                print "EA %08x" % ea
+                print("EA %08x" % ea)
             
             ea_function_start = idc.GetFunctionAttr(ea, idc.FUNCATTR_START)
             
@@ -159,7 +159,7 @@ class Amnesia:
                 ):
                     if makefunction:
                         if self.printflag:
-                            print "Converting code to function @ %08x" % ea
+                            print("Converting code to function @ %08x" % ea)
                         idc.MakeFunction(ea)
 
                     eanewfunction = idc.FindFuncEnd(ea)
@@ -206,7 +206,7 @@ class Amnesia:
                 
                 if makefunction and (mnem == "PUSH" or mnem == "PUSH.W" or mnem == "STM" or mnem=="MOV"):
                     if self.printflag:
-                        print "nonfunction_first_instruction_heuristic() making function %08x" % ea
+                        print("nonfunction_first_instruction_heuristic() making function %08x" % ea)
                     idc.MakeFunction(ea)
                     flag_code_outside_function = False
                     ea =ida_search.find_not_func(ea, 1)
@@ -214,7 +214,7 @@ class Amnesia:
                 
                 else:
                     if self.printflag:
-                        print "nonfunction_first_instruction_heuristic() other instruction %08x\t'%s'" % (ea, mnem)
+                        print("nonfunction_first_instruction_heuristic() other instruction %08x\t'%s'" % (ea, mnem))
                     ea = idc.NextFunction(ea)
                     continue
 
