@@ -70,8 +70,8 @@ class CortexMFirmware:
         ]
 
         if not self.verify_processor_settings():
-            print "ERROR: Processor architecture is incorrect"
-            print "Please set processor type to ARM, and ARM architecture options to ARMv7-M (or other valid Cortex architecture)"
+            print("ERROR: Processor architecture is incorrect")
+            print("Please set processor type to ARM, and ARM architecture options to ARMv7-M (or other valid Cortex architecture)")
             return None
             
         
@@ -103,26 +103,26 @@ class CortexMFirmware:
             entry_addr = vtoffset + 4 * annotation_index
             entry_name = "%s_%08x" % (self.annotations[annotation_index], entry_addr)
             
-            idc.MakeDword(entry_addr)
+            ida_bytes.create_data(entry_addr, ida_bytes.FF_DWORD, 4, idaapi.BADADDR)
             ida_name.set_name(entry_addr, entry_name, 0)
         
             # get the bytes of the vt entry
-            dword = idc.Dword(entry_addr)
+            dword = idc.get_wide_dword(entry_addr)
 
             if dword != 0:
                 # print "ea %08x = 0x%08x" % (ea, dword)
-                idc.MakeCode(dword-1)
-                idc.MakeFunction(dword-1)
+                idc.create_insn(dword-1)
+                ida_funcs.add_func(dword-1)
                 # TODO fix the offsets created here
                 # for thumb, they show to be off by a byte
                 # one of the end args controls stuff about this
-                idc.OpOffEx(entry_addr,0,idaapi.REF_OFF32, -1, 0, 0)
+                idc.op_offset(entry_addr, 0, idaapi.REF_OFF32, -1, 0, 0)
             
-                instruction = idc.Word(dword-1)
+                instruction = idc.get_wide_word(dword-1)
                 
                 # functions like this are common 
                 if instruction == 0xe7fe:
-                    idc.SetFunctionCmt(dword-1, 'Infinite Loop', 1)
+                    idc.set_func_cmt(dword-1, 'Infinite Loop', 1)
 
 
     def find_functions(self):
@@ -130,7 +130,7 @@ class CortexMFirmware:
         Using the Amnesia IDA Python module, find ARM code and create functions
         '''
         
-        a =  Amnesia()
+        a = Amnesia()
         a.find_pushpop_registers_thumb(makecode=True)
         a.find_pushpop_registers_arm(makecode=True)
         a.find_function_epilogue_bxlr(makecode=True)

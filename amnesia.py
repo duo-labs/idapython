@@ -1,4 +1,5 @@
 import idc
+import ida_ida
 import ida_bytes
 import ida_funcs
 import ida_search
@@ -30,8 +31,8 @@ class Amnesia:
         This is a common way to return from a function call.
         Using the IDA API, convert these opcodes to code. This kicks off IDA analysis.
         '''
-        EAstart = idc.MinEA()
-        EAend   = idc.MaxEA()
+        EAstart = ida_ida.inf_get_min_ea()
+        EAend   = ida_ida.inf_get_max_ea()
     
         ea = EAstart
         length = 2 # this code isn't tolerant to values other than 2 right now
@@ -43,13 +44,13 @@ class Amnesia:
         while ea < EAend:
             instructions = []
             for i in range(length):
-                instructions.append(idc.Byte(ea + i))
+                instructions.append(idc.get_wide_byte(ea + i))
 
-            if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and instructions[0] == 0x70 and instructions[1] == 0x47:
+            if not ida_bytes.is_code(ida_bytes.get_full_flags(ea)) and instructions[0] == 0x70 and instructions[1] == 0x47:
                 if self.printflag:
-                    print fmt_string % (ea, instructions[0], instructions[1])
+                    print(fmt_string % (ea, instructions[0], instructions[1]))
                 if makecode:
-                    idc.MakeCode(ea)
+                    idc.create_insn(ea)
             ea = ea + length
 
     def find_pushpop_registers_thumb(self, makecode=False):
@@ -65,8 +66,8 @@ class Amnesia:
         thumb_reg_list = [0x00, 0x02, 0x08, 0x0b, 0x0e, 0x10, 0x1c, 0x1f, 0x30, 0x30, 0x38, 0x3e, 0x4e, 
         0x55, 0x70, 0x72, 0x73, 0x7c, 0x7f, 0x80, 0x90, 0xb0, 0xf0, 0xf3, 0xf7, 0xf8, 0xfe, 0xff]
         
-        EAstart = idc.MinEA()
-        EAend   = idc.MaxEA()
+        EAstart = ida_ida.inf_get_min_ea()
+        EAend   = ida_ida.inf_get_max_ea()
     
         ea = EAstart
         length = 2 # this code isn't tolerant to values other than 2 right now
@@ -78,13 +79,13 @@ class Amnesia:
         while ea < EAend:
             instructions = []
             for i in range(length):
-                instructions.append(idc.Byte(ea + i))
+                instructions.append(idc.get_wide_byte(ea + i))
 
-            if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and instructions[0] in thumb_reg_list and (instructions[1] == 0xb5 or instructions[1]== 0xbd):
+            if not ida_bytes.is_code(ida_bytes.get_full_flags(ea)) and instructions[0] in thumb_reg_list and (instructions[1] == 0xb5 or instructions[1]== 0xbd):
                 if self.printflag:
-                    print fmt_string % (ea, instructions[0], instructions[1])
+                    print(fmt_string % (ea, instructions[0], instructions[1]))
                 if makecode:
-                    idc.MakeCode(ea)
+                    idc.create_insn(ea)
             ea = ea + length
 
     def find_pushpop_registers_arm(self, makecode=False):
@@ -96,8 +97,8 @@ class Amnesia:
         ** ** 2d e9 and ** ** bd e8
         '''
         
-        EAstart = idc.MinEA()
-        EAend   = idc.MaxEA()
+        EAstart = ida_ida.inf_get_min_ea()
+        EAend   = ida_ida.inf_get_max_ea()
     
         ea = EAstart
         length = 2 # this code isn't tolerant to values other than 2 right now
@@ -109,23 +110,23 @@ class Amnesia:
         while ea < EAend:
             instructions = []
             for i in range(length):
-                instructions.append(idc.Byte(ea + i))
+                instructions.append(idc.get_wide_byte(ea + i))
 
             # print BX LR bytes
-            if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and      \
+            if not ida_bytes.is_code(ida_bytes.get_full_flags(ea)) and      \
             (instructions[0] == 0xbd and instructions[1] == 0xe8): 
                 if self.printflag:
-                    print fmt_string % ("POP ", ea, instructions[0], instructions[1])
+                    print(fmt_string % ("POP ", ea, instructions[0], instructions[1]))
                 if makecode:
-                    idc.MakeCode(ea)
+                    idc.create_insn(ea)
             
-            if not ida_bytes.isCode(ida_bytes.getFlags(ea)) and      \
+            if not ida_bytes.is_code(ida_bytes.get_full_flags(ea)) and      \
             (instructions[0] == 0x2d and instructions[1] == 0xe9)    \
             :
                 if self.printflag:
-                    print fmt_string % ("PUSH", ea, instructions[0], instructions[1])
+                    print(fmt_string % ("PUSH", ea, instructions[0], instructions[1]))
                 if makecode: 
-                    idc.MakeCode(ea)
+                    idc.create_insn(ea)
             ea = ea + length
 
     def make_new_functions_heuristic_push_regs(self, makefunction=False):
@@ -133,25 +134,25 @@ class Amnesia:
         After converting bytes to instructions, Look for PUSH instructions that are likely the beginning of functions.
         Convert these code areas to functions.
         '''
-        EAstart = idc.MinEA()
-        EAend   = idc.MaxEA()
+        EAstart = ida_ida.inf_get_min_ea()
+        EAend   = ida_ida.inf_get_max_ea()
         ea = EAstart
         
         while ea < EAend:
             if self.printflag:
-                print "EA %08x" % ea
+                print("EA %08x" % ea)
             
-            ea_function_start = idc.GetFunctionAttr(ea, idc.FUNCATTR_START)
+            ea_function_start = idc.get_func_attr(ea, idc.FUNCATTR_START)
             
             # If ea is inside a defined function, skip to end of function
             if ea_function_start != idc.BADADDR:
-                ea = idc.FindFuncEnd(ea)
+                ea = idc.find_func_end(ea)
                 continue
 
             # If current ea is code
-            if ida_bytes.isCode(ida_bytes.getFlags(ea)):
+            if ida_bytes.is_code(ida_bytes.get_full_flags(ea)):
                 # Looking for prologues that do PUSH {register/s}
-                mnem = idc.GetMnem(ea)
+                mnem = idc.print_insn_mnem(ea)
                 
                 # 
                 if (
@@ -159,10 +160,10 @@ class Amnesia:
                 ):
                     if makefunction:
                         if self.printflag:
-                            print "Converting code to function @ %08x" % ea
-                        idc.MakeFunction(ea)
+                            print("Converting code to function @ %08x" % ea)
+                        ida_funcs.add_func(ea)
 
-                    eanewfunction = idc.FindFuncEnd(ea)
+                    eanewfunction = idc.find_func_end(ea)
                     if eanewfunction != idc.BADADDR:
                         ea = eanewfunction
                         continue
@@ -175,8 +176,8 @@ class Amnesia:
                 ea += 1
 
     def nonfunction_first_instruction_heuristic(self, makefunction=False):
-        EAstart = idc.MinEA()
-        EAend   = idc.MaxEA()
+        EAstart = ida_ida.inf_get_min_ea()
+        EAend   = ida_ida.inf_get_max_ea()
         ea = EAstart
         
         flag_code_outside_function = False
@@ -185,37 +186,37 @@ class Amnesia:
         while ea < EAend:
 
             # skip functions, next instruction will be the target to inspect
-            function_name = idc.GetFunctionName(ea)
+            function_name = idc.get_func_name(ea)
             if function_name != "":
 
                 flag_code_outside_function = False
 
                 # skip to end of function and keep going
-                # ea = idc.FindFuncEnd(ea)
+                # ea = idc.find_func_end(ea)
                 #if self.printflag:
                 #    print "Skipping function %s" % (function_name)
 
                 ea = ida_search.find_not_func(ea, 1)
                 continue
 
-            elif ida_bytes.isCode(ida_bytes.getFlags(ea)):
+            elif ida_bytes.is_code(ida_bytes.get_full_flags(ea)):
 
                 # code that is not a function
                 # get mnemonic to see if this is a push
-                mnem = idc.GetMnem(ea)
+                mnem = idc.print_insn_mnem(ea)
                 
                 if makefunction and (mnem == "PUSH" or mnem == "PUSH.W" or mnem == "STM" or mnem=="MOV"):
                     if self.printflag:
-                        print "nonfunction_first_instruction_heuristic() making function %08x" % ea
-                    idc.MakeFunction(ea)
+                        print("nonfunction_first_instruction_heuristic() making function %08x" % ea)
+                    ida_funcs.add_func(ea)
                     flag_code_outside_function = False
-                    ea =ida_search.find_not_func(ea, 1)
+                    ea = ida_search.find_not_func(ea, 1)
                     continue
                 
                 else:
                     if self.printflag:
-                        print "nonfunction_first_instruction_heuristic() other instruction %08x\t'%s'" % (ea, mnem)
-                    ea = idc.NextFunction(ea)
+                        print("nonfunction_first_instruction_heuristic() other instruction %08x\t'%s'" % (ea, mnem))
+                    ea = idc.get_next_func(ea)
                     continue
 
             ea += 1
